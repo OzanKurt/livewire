@@ -2,6 +2,7 @@
 
 namespace Livewire\HydrationMiddleware;
 
+use Illuminate\Http\UploadedFile;
 use Livewire\Exceptions\PublicPropertyTypeNotAllowedException;
 
 class HydratePublicProperties implements HydrationMiddleware

@@ -2,6 +2,8 @@
 
 namespace Livewire;
 
+use Illuminate\Http\UploadedFile;
+
 class ComponentChecksumManager
 {
     public function generate($name, $id, $data)

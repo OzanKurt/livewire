@@ -3,10 +3,10 @@
 namespace Livewire\ComponentConcerns;
 
 use Illuminate\Support\Str;
+use Livewire\Exceptions\MethodNotFoundException;
 use Livewire\Exceptions\NonPublicComponentMethodCall;
 use Livewire\Exceptions\PublicPropertyNotFoundException;
 use Livewire\Exceptions\CannotBindDataToEloquentModelException;
-use Livewire\Exceptions\MethodNotFoundException;
 
 trait HandlesActions
 {
@@ -38,6 +38,35 @@ trait HandlesActions
 
             $this->rehashProperty($name);
         });
+    }
+
+    public function fileChanged($name, $value)
+    {
+        // @todo: check if we need a validation here.
+        // throw_if();
+
+        $this->callBeforeAndAferUploadHooks($name, $value, function ($name, $value) {
+            $this->setFile($name, $value);
+        });
+    }
+
+    protected function callBeforeAndAferUploadHooks($name, $value, $callback)
+    {
+        $propertyName = Str::before(Str::studly($name), '.');
+        $keyAfterFirstDot = Str::contains($name, '.') ? Str::after($name, '.') : null;
+
+        $beforeMethod = 'uploading'.$propertyName;
+        $afterMethod = 'uploaded'.$propertyName;
+
+        if (method_exists($this, $beforeMethod)) {
+            $this->{$beforeMethod}($value, $keyAfterFirstDot);
+        }
+
+        $callback($name, $value);
+
+        if (method_exists($this, $afterMethod)) {
+            $this->{$afterMethod}($value, $keyAfterFirstDot);
+        }
     }
 
     protected function callBeforeAndAferSyncHooks($name, $value, $callback)

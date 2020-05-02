@@ -6,7 +6,6 @@ use Livewire\ObjectPrybar;
 use Illuminate\Support\Arr;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 trait ValidatesInput
@@ -98,12 +97,7 @@ trait ValidatesInput
             = $this->getPropertyValue($propertyNameFromValidationField);
 
         try {
-            // If the field is "items.0.foo", we should apply the validation rule for "items.*.foo".
-            $rulesForField = collect($rules)->filter(function ($rule, $fullFieldKey) use ($field) {
-                return Str::is($fullFieldKey, $field);
-            })->toArray();
-
-            $result = Validator::make($result, $rulesForField, $messages, $attributes)
+            $result = Validator::make($result, Arr::only($rules, $field), $messages, $attributes)
                 ->validate();
         } catch (ValidationException $e) {
             $messages = $e->validator->getMessageBag();

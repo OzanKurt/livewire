@@ -8,8 +8,20 @@ use Illuminate\Validation\ValidationException;
 
 abstract class ConnectionHandler
 {
+    protected function fixPayload($payload) {
+        array_walk_recursive($payload, function (&$element) {
+            if ($element == 'null') {
+                $element = null;
+            }
+        });
+
+        return $payload;
+    }
+
     public function handle($payload)
     {
+        $payload = $this->fixPayload($payload);
+
         $instance = app('livewire')->activate($payload['name'], $payload['id']);
 
         try {
@@ -44,6 +56,9 @@ abstract class ConnectionHandler
         switch ($type) {
             case 'callMethod':
                 $instance->callMethod($data['method'], $data['params']);
+                break;
+            case 'fileChanged':
+                $instance->fileChanged($data['name']);
                 break;
             case 'fireEvent':
                 $instance->fireEvent($data['event'], $data['params']);

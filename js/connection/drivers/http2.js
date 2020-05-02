@@ -1,3 +1,5 @@
+import DOM from '@/dom/dom'
+
 export default {
     onError: null,
     onMessage: null,
@@ -6,46 +8,105 @@ export default {
         //
     },
 
-    buildFormData(formData, data, parentKey) {
-        if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
-
-            if (Array.isArray(data)) {
-                if (data.length === 0) {
-                    formData.append(parentKey, Array.isArray(data) ? [] : {});
-                    return;
-                }
-            }
+    getFormData(formData, data, previousKey) {
+        if (data instanceof Object) {
+            // console.log('data: ' + JSON.stringify(data))
+            // console.log('previousKey: ' + previousKey)
 
             Object.keys(data).forEach(key => {
-                this.buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
+                const value = data[key];
+
+                console.log('Key: ' + key)
+                // if (value instanceof Object) {
+                //     console.log('Value: ' + JSON.stringify(value))
+                // } else {
+                //     console.log('Value: ' + value)
+                // }
+
+                if (previousKey) {
+                    key = `${previousKey}[${key}]`;
+                }
+
+                if (value instanceof Object && !Array.isArray(value)) {
+                    // console.log(`Object found, calling recursive getFormData(formData, ${value}, ${key})`)
+                    return this.getFormData(formData, value, key);
+                }
+
+                if (Array.isArray(value)) {
+                    // console.log(`Array found, looping elements...`)
+
+                    if (value.length === 0) {
+                        formData.append(`${key}`, []);
+                    } else {
+                        value.forEach((val, index) => {
+                            if (value instanceof Object) {
+                                // console.log('Arrays element is an object!')
+                                // console.log('Current Key: ' + key)
+
+                                key = key + '[' + index + ']'
+
+                                // console.log('New Key: ' + key)
+
+                                return this.getFormData(formData, val, key);
+                            } else {
+                                formData.append(`${key}[]`, val);
+                            }
+                        });
+                    }
+                } else {
+                    if (value == 'null') {
+                        formData.append(key, null);
+                    } else {
+                        formData.append(key, value);
+                    }
+                    if (value !== null && value.includes('wire\\:file=')) {
+                        let el = document.querySelector(`[${value}]`);
+
+                        formData.append(key, el.files[0]);
+                    } else {
+                    }
+                }
             });
-        } else {
-            const value = data;
-
-            formData.append(parentKey, value);
         }
-    },
-
-    jsonToFormData(data) {
-        const formData = new FormData();
-
-        this.buildFormData(formData, data);
-
-        return formData;
     },
 
     sendMessage(payload) {
 
-        const formData = this.jsonToFormData(payload)
+        // console.log(payload)
+
+        // const component = document.querySelector(`[wire\\:id="${payload.id}"]`);
+        // const allFileElements = DOM.allFileElementsInside(component);
+
+        // console.log(allFileElements)
+
+        // const formData = new FormData();
+
+        // // const fileField = document.querySelector('input[type="file"]');
+        // // formData.append('actionQueue[file]', fileField.files[0]);
+
+        // this.getFormData(formData, payload)
+
+        // // Display the key/value pairs
+        // for (var pair of formData.entries()) {
+        //     console.log(pair[0]+ ' => ' + pair[1]);
+        // }
+
+        // const photos = document.querySelector('input[type="file"][multiple]');
+
+        // formData.append('title', 'My Vegas Vacation');
+        // for (let i = 0; i < photos.files.length; i++) {
+        //   formData.append('photos', photos.files[i]);
+        // }
 
         // Forward the query string for the ajax requests.
         fetch(`${window.livewire_app_url}/livewire/message/${payload.name}${window.location.search}`, {
             method: 'POST',
-            body: formData,
-            // body: JSON.stringify(payload),
+            body: JSON.stringify(payload),
+            // body: formData,
             // This enables "cookies".
             credentials: "same-origin",
             headers: {
+                // 'Content-Type': 'multipart/form-data',
                 // 'Content-Type': 'application/json',
                 'Accept': 'text/html, application/xhtml+xml',
                 'X-CSRF-TOKEN': this.getCSRFToken(),

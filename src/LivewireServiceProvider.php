@@ -35,6 +35,7 @@ use Livewire\HydrationMiddleware\{
     PersistErrorBag,
     UpdateQueryString,
     InterceptRedirects,
+    PerformFileUploads,
     CastPublicProperties,
     RegisterEmittedEvents,
     HydratePublicProperties,
@@ -179,7 +180,7 @@ class LivewireServiceProvider extends ServiceProvider
     {
         if (method_exists($this->app['blade.compiler'], 'precompiler')) {
             $this->app['blade.compiler']->precompiler(function ($string) {
-                return app(LivewireTagCompiler::class)->compile($string);
+                return (new LivewireTagCompiler)->compile($string);
             });
         }
     }
@@ -230,6 +231,7 @@ class LivewireServiceProvider extends ServiceProvider
         /* v */ HashPropertiesForDirtyDetection::class,             /* ^ */
         /* v */ HydrateEloquentModelsAsPublicProperties::class,     /* ^ */
         /* v */ PerformPublicPropertyFromDataBindingUpdates::class, /* ^ */
+        /* v */ PerformFileUploads::class,                          /* ^ */
         /* v */ CastPublicProperties::class,                        /* ^ */
         /* v */ HydratePreviouslyRenderedChildren::class,           /* ^ */
         /* v */ InterceptRedirects::class,                          /* ^ */

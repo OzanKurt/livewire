@@ -32,6 +32,12 @@ export default class DOM {
         ).map(el => new DOMElement(el))
     }
 
+    static allFileElementsInside(root) {
+        return Array.from(
+            root.querySelectorAll(`[wire\\:file]`)
+        ).map(el => new DOMElement(el))
+    }
+
     static getByAttributeAndValue(attribute, value) {
         return new DOMElement(document.querySelector(`[wire\\:${attribute}="${value}"]`))
     }

@@ -16,6 +16,7 @@ abstract class Component
 
     use ComponentConcerns\ValidatesInput,
         ComponentConcerns\HandlesActions,
+        ComponentConcerns\HandlesFileUploads,
         ComponentConcerns\ReceivesEvents,
         ComponentConcerns\PerformsRedirects,
         ComponentConcerns\DetectsDirtyProperties,

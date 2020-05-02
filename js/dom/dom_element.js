@@ -134,6 +134,8 @@ ${this.el.outerHTML}
             }
         } else if (this.el.tagName === 'SELECT') {
             this.updateSelect(value)
+        } else if (this.el.getAttribute('type') == 'file') {
+            // Don't update the file input
         } else {
             this.el.value = value
         }

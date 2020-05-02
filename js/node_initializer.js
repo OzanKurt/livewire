@@ -1,6 +1,7 @@
 import { kebabCase, debounce } from '@/util'
 import ModelAction from '@/action/model'
 import MethodAction from '@/action/method'
+import FileAction from '@/action/file'
 import DOMElement from '@/dom/dom_element'
 import store from '@/Store'
 
@@ -15,6 +16,10 @@ export default {
                 case 'model':
                     el.setInputValueFromModel(component)
                     this.attachModelListener(el, directive, component)
+                    break;
+
+                case 'file':
+                    this.attachFileListener(el, directive, component)
                     break;
 
                 default:
@@ -71,6 +76,20 @@ export default {
 
         component.addListenerForTeardown(() => {
             el.removeEventListener(event, handler)
+        })
+    },
+
+    attachFileListener(el, directive, component) {
+        const handler = e => {
+            const name = directive.value
+
+            component.addAction(new FileAction(name, el))
+        }
+
+        el.addEventListener('change', handler)
+
+        component.addListenerForTeardown(() => {
+            el.removeEventListener('change', handler)
         })
     },
 
